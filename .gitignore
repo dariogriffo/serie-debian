@@ -1,0 +1,12 @@
+# .deb Packages
+*.deb
+
+# Source packages and downloaded upstream tarballs
+*.dsc
+*.orig.tar.gz
+*.debian.tar.xz
+*.tar.gz
+serie-*/
+
+.idea/*
+.DS_Store

@@ -1,0 +1,9 @@
+serie (FULL_VERSION) DIST; urgency=low
+
+  * Unofficial Debian/Ubuntu package of the upstream serie release, built from
+    the statically linked musl binary published by upstream.
+  * Upstream does not ship a man page or shell completions, and the binary
+    cannot generate them, so this package installs the binary only.
+  * Upstream release notes: https://github.com/lusingander/serie/releases
+
+ -- Dario Griffo <dariogriffo@gmail.com>  Mon, 01 Jan 2024 00:00:00 +0000

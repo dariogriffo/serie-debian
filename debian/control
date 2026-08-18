@@ -1,0 +1,27 @@
+Source: serie
+Section: vcs
+Priority: optional
+Maintainer: Dario Griffo <dariogriffo@gmail.com>
+Build-Depends: debhelper-compat (= 13), wget, ca-certificates
+Standards-Version: 4.6.2
+Homepage: https://github.com/lusingander/serie
+Rules-Requires-Root: no
+
+Package: serie
+Architecture: amd64 arm64
+Depends: ${misc:Depends}, git
+Description: terminal UI that draws a rich git commit graph
+ Serie is a terminal user interface for browsing the history of a Git
+ repository. It renders the commit graph the way "git log --graph --all"
+ does, but as real images drawn with the terminal emulator's image display
+ protocol (Kitty or iTerm2), so branches and merges are readable at a glance
+ instead of being approximated with ASCII art.
+ .
+ Run "serie" inside a Git repository to get a scrollable, searchable commit
+ list next to the graph, with a detail view for each commit showing its
+ message, refs and diff. It is a viewer, not a Git client: it does not commit,
+ branch or push.
+ .
+ A terminal emulator supporting the Kitty or iTerm2 inline image protocol
+ (for example Kitty, WezTerm, iTerm2 or Ghostty) is required for the graph to
+ render.

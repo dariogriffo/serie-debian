@@ -1,0 +1,89 @@
+name: Build serie for Debian
+
+on:
+  workflow_dispatch:
+    inputs:
+      serie_version:
+        description: The version of serie to build.
+        type: string
+        required: true
+      build_version:
+        description: The build version.
+        type: string
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-serie:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout serie-debian
+        uses: actions/checkout@v4
+
+      - name: Validate upstream license permits paid distribution
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./validate_license.sh ${{ inputs.serie_version }}
+
+      - name: Build serie
+        run: ./build.sh ${{ inputs.serie_version }} ${{ inputs.build_version }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact
+          path: serie_*.deb
+
+  build-src:
+    name: Build Source Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout serie-debian
+        uses: actions/checkout@v4
+
+      - name: Install dpkg-dev
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends dpkg-dev devscripts wget ca-certificates
+
+      - name: Build source packages
+        run: ./build_src.sh ${{ inputs.serie_version }} ${{ inputs.build_version }}
+
+      - name: Upload Source Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-artifact
+          path: |
+            serie_*.dsc
+            serie_*.orig.tar.gz
+            serie_*.debian.tar.xz
+
+  release-serie:
+    name: Release serie for Debian
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [build-serie, build-src]
+    steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact
+
+      - name: Download Source Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: source-artifact
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          files: |
+            serie_*.deb
+            serie_*.dsc
+            serie_*.orig.tar.gz
+            serie_*.debian.tar.xz
+          name: ${{ inputs.serie_version }}+${{ inputs.build_version }}
+          tag_name: ${{ inputs.serie_version }}+${{ inputs.build_version }}
+          fail_on_unmatched_files: true

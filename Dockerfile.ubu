@@ -1,0 +1,33 @@
+ARG UBUNTU_DIST=noble
+FROM ubuntu:$UBUNTU_DIST
+
+ARG UBUNTU_DIST
+ARG serie_VERSION
+ARG BUILD_VERSION
+ARG FULL_VERSION
+ARG ARCH
+ARG SERIE_RELEASE
+
+RUN mkdir -p /output/usr/bin
+RUN mkdir -p /output/usr/share/doc/serie
+RUN mkdir -p /output/DEBIAN
+
+# Upstream ships a flat tarball containing only the binary: no man page and no
+# shell completions, and the binary cannot generate completions either.
+COPY ${SERIE_RELEASE}/serie /output/usr/bin/
+RUN chmod 755 /output/usr/bin/serie
+COPY output/DEBIAN/control /output/DEBIAN/
+COPY output/DEBIAN/postinst /output/DEBIAN/postinst
+RUN chmod 755 /output/DEBIAN/postinst
+COPY output/copyright /output/usr/share/doc/serie/
+COPY output/changelog.Debian /output/usr/share/doc/serie/
+COPY output/README.md /output/usr/share/doc/serie/
+
+RUN sed -i "s/DIST/$UBUNTU_DIST/" /output/usr/share/doc/serie/changelog.Debian
+RUN sed -i "s/FULL_VERSION/$FULL_VERSION/" /output/usr/share/doc/serie/changelog.Debian
+RUN sed -i "s/DIST/$UBUNTU_DIST/" /output/DEBIAN/control
+RUN sed -i "s/serie_VERSION/$serie_VERSION/" /output/DEBIAN/control
+RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/control
+RUN sed -i "s/SUPPORTED_ARCHITECTURES/$ARCH/" /output/DEBIAN/control
+
+RUN dpkg-deb --build /output /serie_${FULL_VERSION}.deb

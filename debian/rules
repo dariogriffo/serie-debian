@@ -1,0 +1,38 @@
+#!/usr/bin/make -f
+DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+SERIE_VERSION := $(shell dpkg-parsechangelog -S Version | sed 's/[-~].*//')
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+
+override_dh_auto_build:
+	@arch="$(DEB_HOST_ARCH)"; \
+	case "$$arch" in \
+		amd64)   SERIE_RELEASE="serie-$(SERIE_VERSION)-x86_64-unknown-linux-musl" ;; \
+		arm64)   SERIE_RELEASE="serie-$(SERIE_VERSION)-aarch64-unknown-linux-musl" ;; \
+		*) echo "Unsupported architecture: $$arch"; exit 1 ;; \
+	esac; \
+	echo "Downloading $$SERIE_RELEASE for $(SERIE_VERSION)..."; \
+	wget -q "https://github.com/lusingander/serie/releases/download/v$(SERIE_VERSION)/$$SERIE_RELEASE.tar.gz"; \
+	mkdir -p "$$SERIE_RELEASE"; \
+	tar -xf "$$SERIE_RELEASE.tar.gz" -C "$$SERIE_RELEASE"; \
+	rm -f "$$SERIE_RELEASE.tar.gz"; \
+	echo "$$SERIE_RELEASE" > .serie_release_name
+
+override_dh_auto_install:
+	@SERIE_RELEASE=$$(cat .serie_release_name); \
+	install -D -m 755 "$$SERIE_RELEASE/serie" debian/serie/usr/bin/serie
+
+override_dh_auto_test:
+
+override_dh_auto_clean:
+	@if [ -f .serie_release_name ]; then \
+		SERIE_RELEASE=$$(cat .serie_release_name); \
+		rm -rf "$$SERIE_RELEASE" .serie_release_name || true; \
+	fi
+
+override_dh_strip:
+
+override_dh_shlibdeps:
