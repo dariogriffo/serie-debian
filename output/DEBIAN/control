@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Dario Griffo <dariogriffo@gmail.com>
 Homepage: https://github.com/lusingander/serie
 Package: serie
-Version: serie_VERSION-BUILD_VERSION~DIST
+Version: serie_VERSION-BUILD_VERSION~griffo
 Architecture: SUPPORTED_ARCHITECTURES
 Depends: git
 Description: terminal UI that draws a rich git commit graph
